@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/todo.dart';
 
 class TodoProvider extends ChangeNotifier {
   final List<Todo> _todos = [];
+  final Uuid _uuid = Uuid();
 
   List<Todo> get todos => _todos;
 
   void addTodo(String title, DateTime deadline) {
     _todos.add(
-      Todo(title: title, createdAt: DateTime.now(), deadline: deadline),
+      Todo(
+        id: _uuid.v4(),
+        title: title,
+        createdAt: DateTime.now(),
+        deadline: deadline,
+      ),
     );
     notifyListeners();
   }
