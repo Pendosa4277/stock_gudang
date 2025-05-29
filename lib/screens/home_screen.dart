@@ -27,34 +27,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showAddDialog() {
     final TextEditingController controller = TextEditingController();
+    bool isInputValid = false;
 
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Tambah Todo"),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(hintText: "Tulis todo..."),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Tambah Todo"),
+              content: TextField(
+                controller: controller,
+                decoration: const InputDecoration(hintText: "Tulis todo..."),
+                onChanged: (value) {
+                  setState(() {
+                    isInputValid = value.trim().isNotEmpty;
+                  });
                 },
-                child: const Text("Batal"),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (controller.text.trim().isNotEmpty) {
-                    _addTodo(controller.text.trim());
-                  }
-                  Navigator.pop(context);
-                },
-                child: const Text("Tambah"),
-              ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Batal"),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      isInputValid
+                          ? () {
+                            _addTodo(controller.text.trim());
+                            Navigator.pop(context);
+                          }
+                          : null,
+                  child: const Text("Tambah"),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
