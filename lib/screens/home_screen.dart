@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/todo.dart';
+import '../screens/detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -68,6 +69,14 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListTile(
             title: Text(todo.title),
             subtitle: Text('Deadline: ${todo.deadline.toLocal()}'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailScreen(todo: todo),
+                ),
+              );
+            },
           );
         },
       ),

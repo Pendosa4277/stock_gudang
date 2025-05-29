@@ -11,6 +11,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Todo App', home: const HomeScreen());
+    return const MaterialApp(title: 'Todo App', home: HomeScreen());
   }
 }
