@@ -69,6 +69,14 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListTile(
             title: Text(todo.title),
             subtitle: Text('Deadline: ${todo.deadline.toLocal()}'),
+            trailing: IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                setState(() {
+                  todos.removeAt(index);
+                });
+              },
+            ),
             onTap: () {
               Navigator.push(
                 context,
