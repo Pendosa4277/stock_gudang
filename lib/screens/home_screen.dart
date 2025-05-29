@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/todo.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,11 +9,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> todos = [];
+  List<Todo> todos = [];
 
-  void _addTodo(String newTodo) {
+  void _addTodo(String title) {
     setState(() {
-      todos.add(newTodo);
+      todos.add(
+        Todo(
+          id: DateTime.now().toString(),
+          title: title,
+          createdAt: DateTime.now(),
+          deadline: DateTime.now().add(const Duration(days: 7)),
+        ),
+      );
     });
   }
 
@@ -55,7 +63,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(title: const Text('Daftar Todo')),
       body: ListView.builder(
         itemCount: todos.length,
-        itemBuilder: (context, index) => ListTile(title: Text(todos[index])),
+        itemBuilder: (context, index) {
+          final todo = todos[index];
+          return ListTile(
+            title: Text(todo.title),
+            subtitle: Text('Deadline: ${todo.deadline.toLocal()}'),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
