@@ -12,14 +12,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Todo> todos = [];
 
-  void _addTodo(String title) {
+  void _addTodo(String title, DateTime deadline) {
     setState(() {
       todos.add(
         Todo(
           id: DateTime.now().toString(),
           title: title,
           createdAt: DateTime.now(),
-          deadline: DateTime.now().add(const Duration(days: 7)),
+          deadline: deadline, //DateTime.now().add(const Duration(days: 7))
         ),
       );
     });
@@ -27,6 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showAddDialog() {
     final TextEditingController controller = TextEditingController();
+    DateTime? selectedDeadline;
+    TimeOfDay? selectedTime;
     bool isInputValid = false;
 
     showDialog(
@@ -34,29 +36,100 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            void updateIsValid() {
+              setState(() {
+                isInputValid =
+                    controller.text.trim().isNotEmpty &&
+                    selectedDeadline != null &&
+                    selectedTime != null;
+              });
+            }
+
             return AlertDialog(
               title: const Text("Tambah Todo"),
-              content: TextField(
-                controller: controller,
-                decoration: const InputDecoration(hintText: "Tulis todo..."),
-                onChanged: (value) {
-                  setState(() {
-                    isInputValid = value.trim().isNotEmpty;
-                  });
-                },
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      hintText: "Tulis todo...",
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedDeadline == null
+                              ? "pilih tanggal deadline"
+                              : "Tanggal: ${selectedDeadline!.toLocal().toString().split(' ')[0]}",
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              selectedDeadline = picked;
+                            });
+                            updateIsValid();
+                          }
+                        },
+                        child: const Text("Pilih"),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedTime == null
+                              ? "Pilih waktu deadline"
+                              : "Waktu: ${selectedTime!.format(context)}",
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          final TimeOfDay? pickedTime = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                          );
+                          if (pickedTime != null) {
+                            setState(() {
+                              selectedTime = pickedTime;
+                            });
+                            updateIsValid();
+                          }
+                        },
+                        child: const Text("Pilih"),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: () => Navigator.pop(context),
                   child: const Text("Batal"),
                 ),
                 ElevatedButton(
                   onPressed:
                       isInputValid
                           ? () {
-                            _addTodo(controller.text.trim());
+                            final deadline = DateTime(
+                              selectedDeadline!.year,
+                              selectedDeadline!.month,
+                              selectedDeadline!.day,
+                              selectedTime!.hour,
+                              selectedTime!.minute,
+                            );
+                            _addTodo(controller.text.trim(), deadline);
                             Navigator.pop(context);
                           }
                           : null,
@@ -70,6 +143,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _updateTodo(int index, Todo updatedTodo) {
+    setState(() {
+      todos[index] = updatedTodo;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,19 +160,46 @@ class _HomeScreenState extends State<HomeScreen> {
           return ListTile(
             title: Text(todo.title),
             subtitle: Text('Deadline: ${todo.deadline.toLocal()}'),
-            trailing: IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  todos.removeAt(index);
-                });
-              },
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.blue),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => DetailScreen(
+                              todo: todo,
+                              onUpdate:
+                                  (updatedTodo) =>
+                                      _updateTodo(index, updatedTodo),
+                            ),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    setState(() {
+                      todos.removeAt(index);
+                    });
+                  },
+                ),
+              ],
             ),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DetailScreen(todo: todo),
+                  builder:
+                      (context) => DetailScreen(
+                        todo: todo,
+                        onUpdate:
+                            (updatedTodo) => _updateTodo(index, updatedTodo),
+                      ),
                 ),
               );
             },
