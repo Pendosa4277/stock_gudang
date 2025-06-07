@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_service.dart';
 import 'home_screen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final SupabaseService service;
@@ -71,13 +72,24 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             TextField(
               controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
+              decoration: InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 20),
             isLoading
                 ? CircularProgressIndicator()
                 : ElevatedButton(onPressed: _login, child: Text('Login')),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SignUpScreen(service: widget.service),
+                  ),
+                );
+              },
+              child: Text('Belum punya akun? Daftar'),
+            ),
           ],
         ),
       ),
