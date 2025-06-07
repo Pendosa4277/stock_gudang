@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/todo.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class _DetailScreenState extends State<DetailScreen> {
   late TextEditingController titleController;
   late TextEditingController _detailController;
   late DateTime _selectedDeadline;
-
   bool _isInputValid = true;
 
   @override
@@ -25,6 +25,13 @@ class _DetailScreenState extends State<DetailScreen> {
     _detailController = TextEditingController(text: widget.todo.detail);
     _selectedDeadline = widget.todo.deadline;
     _validateInput();
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    _detailController.dispose();
+    super.dispose();
   }
 
   void _validateInput() {
@@ -86,9 +93,9 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedDeadline =
-        "${_selectedDeadline.toLocal().toString().split('.')[0]}";
-
+    final formattedDeadline = DateFormat(
+      'dd MMM yyyy – HH:mm',
+    ).format(_selectedDeadline);
     return Scaffold(
       appBar: AppBar(title: const Text("Detail Todo")),
       body: Padding(

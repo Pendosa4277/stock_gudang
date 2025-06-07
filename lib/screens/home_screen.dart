@@ -1,41 +1,109 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/todo.dart';
 import '../screens/detail_screen.dart';
+import '../services/supabase_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final SupabaseService service;
+
+  const HomeScreen({super.key, required this.service});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Todo> todos = [];
+  final supabaseClient = Supabase.instance.client;
+  late final SupabaseService supabaseService;
 
-  void _addTodo(String title, DateTime deadline) {
+  List<Todo> todos = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    supabaseService = SupabaseService(supabaseClient);
+    _loadTodos();
+  }
+
+  Future<void> _loadTodos() async {
     setState(() {
-      todos.add(
-        Todo(
-          id: DateTime.now().toString(),
-          title: title,
-          createdAt: DateTime.now(),
-          deadline: deadline, //DateTime.now().add(const Duration(days: 7))
-        ),
-      );
+      isLoading = true;
     });
+    try {
+      final fetchedTodos = await supabaseService.fetchTodos();
+      setState(() {
+        todos = fetchedTodos;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error load todos: $e')));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _addTodo(String title, DateTime deadline) async {
+    final todo = Todo(
+      id: "0",
+      title: title,
+      createdAt: DateTime.now(),
+      deadline: deadline,
+    );
+    try {
+      await supabaseService.addTodo(todo);
+      if (!mounted) return;
+      await _loadTodos();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal tambah todo: $e')));
+    }
+  }
+
+  Future<void> _updateTodo(int index, Todo updatedTodo) async {
+    try {
+      await supabaseService.updateTodo(updatedTodo);
+      if (!mounted) return;
+      await _loadTodos();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal update todo: $e')));
+    }
+  }
+
+  Future<void> _deleteTodo(int id) async {
+    try {
+      await supabaseService.deleteTodo(id);
+      if (!mounted) return;
+      await _loadTodos();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal hapus todo: $e')));
+    }
   }
 
   void _showAddDialog() {
     final TextEditingController controller = TextEditingController();
     DateTime? selectedDeadline;
     TimeOfDay? selectedTime;
-    bool isInputValid = false;
 
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            bool isInputValid = false;
             void updateIsValid() {
               setState(() {
                 isInputValid =
@@ -143,12 +211,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _updateTodo(int index, Todo updatedTodo) {
-    setState(() {
-      todos[index] = updatedTodo;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,9 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    setState(() {
-                      todos.removeAt(index);
-                    });
+                    _deleteTodo(int.parse(todo.id));
                   },
                 ),
               ],
