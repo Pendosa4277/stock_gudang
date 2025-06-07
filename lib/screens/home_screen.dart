@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _addTodo(String title, DateTime deadline) async {
     final todo = Todo(
-      id: "0",
+      id: '',
       title: title,
       createdAt: DateTime.now(),
       deadline: deadline,
@@ -101,16 +101,20 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        bool isInputValid = false;
         return StatefulBuilder(
           builder: (context, setState) {
-            bool isInputValid = false;
             void updateIsValid() {
-              setState(() {
-                isInputValid =
-                    controller.text.trim().isNotEmpty &&
-                    selectedDeadline != null &&
-                    selectedTime != null;
-              });
+              final newValid =
+                  controller.text.trim().isNotEmpty &&
+                  selectedDeadline != null &&
+                  selectedTime != null;
+              if (newValid != isInputValid) {
+                setState(() {
+                  isInputValid = newValid;
+                });
+              }
+              print('isInputValid: $isInputValid');
             }
 
             return AlertDialog(
@@ -123,6 +127,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: const InputDecoration(
                       hintText: "Tulis todo...",
                     ),
+                    onChanged: (value) {
+                      updateIsValid();
+                    },
                   ),
                   const SizedBox(height: 10),
                   Row(

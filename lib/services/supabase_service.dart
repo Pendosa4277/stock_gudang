@@ -7,37 +7,35 @@ class SupabaseService {
   SupabaseService(this.supabase);
 
   Future<List<Todo>> fetchTodos() async {
-    try {
-      final response = await supabase.from('todos').select();
-      return (response as List<dynamic>)
-          .map((item) => Todo.fromMap(item))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to fetch todos: $e');
-    }
+    final response = await supabase
+        .from('todos')
+        .select()
+        .order('created_at', ascending: false);
+    return (response as List<dynamic>)
+        .map((item) => Todo.fromMap(item))
+        .toList();
   }
 
   Future<void> addTodo(Todo todo) async {
-    try {
-      await supabase.from('todos').insert(todo.toMap());
-    } catch (e) {
-      throw Exception('Failed to add todo: $e');
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('User not logged in');
     }
+
+    await supabase.from('todos').insert({
+      'title': todo.title,
+      'created_at': todo.createdAt.toIso8601String(),
+      'deadline': todo.deadline.toIso8601String(),
+      'user_id': user.id,
+    });
   }
 
   Future<void> updateTodo(Todo todo) async {
-    try {
-      await supabase.from('todos').update(todo.toMap()).eq('id', todo.id);
-    } catch (e) {
-      throw Exception('Failed to update todo: $e');
-    }
+    await supabase.from('todos').update(todo.toMap()).eq('id', todo.id);
   }
 
   Future<void> deleteTodo(int id) async {
-    try {
-      await supabase.from('todos').delete().eq('id', id);
-    } catch (e) {
-      throw Exception('Failed to delete todo: $e');
-    }
+    await supabase.from('todos').delete().eq('id', id);
   }
 }

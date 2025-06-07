@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/supabase_service.dart';
 
@@ -22,13 +23,16 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key, required this.service});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final user = service.supabase.auth.currentUser;
     return MaterialApp(
       title: 'Supabase Todo App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomeScreen(service: service),
+      home:
+          user == null
+              ? LoginScreen(service: service)
+              : HomeScreen(service: service),
     );
   }
 }
