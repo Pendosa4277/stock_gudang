@@ -24,7 +24,9 @@ class SupabaseService {
     }
 
     await supabase.from('todos').insert({
+      'id': todo.id,
       'title': todo.title,
+      'detail': todo.detail,
       'created_at': todo.createdAt.toIso8601String(),
       'deadline': todo.deadline.toIso8601String(),
       'user_id': user.id,
@@ -32,10 +34,17 @@ class SupabaseService {
   }
 
   Future<void> updateTodo(Todo todo) async {
-    await supabase.from('todos').update(todo.toMap()).eq('id', todo.id);
+    await supabase
+        .from('todos')
+        .update({
+          'title': todo.title,
+          'detail': todo.detail,
+          'deadline': todo.deadline.toIso8601String(),
+        })
+        .eq('id', todo.id);
   }
 
-  Future<void> deleteTodo(int id) async {
+  Future<void> deleteTodo(String id) async {
     await supabase.from('todos').delete().eq('id', id);
   }
 }

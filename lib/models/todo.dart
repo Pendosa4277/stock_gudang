@@ -1,5 +1,5 @@
 class Todo {
-  String id;
+  final String id;
   String title;
   DateTime createdAt;
   DateTime deadline;

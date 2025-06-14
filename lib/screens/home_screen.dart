@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _deleteTodo(int id) async {
+  Future<void> _deleteTodo(String id) async {
     try {
       await supabaseService.deleteTodo(id);
       if (!mounted) return;
@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    _deleteTodo(int.parse(todo.id));
+                    _deleteTodo(todo.id);
                   },
                 ),
               ],

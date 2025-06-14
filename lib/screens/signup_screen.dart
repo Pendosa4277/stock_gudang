@@ -5,7 +5,7 @@ import 'login_screen.dart';
 class SignUpScreen extends StatefulWidget {
   final SupabaseService service;
 
-  const SignUpScreen({Key? key, required this.service}) : super(key: key);
+  const SignUpScreen({super.key, required this.service});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -31,7 +31,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (res.user != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Pendaftaran berhasil. Silakan login.')),
+          const SnackBar(content: Text('Pendaftaran berhasil. Silakan login.')),
         );
 
         Navigator.pushReplacement(
@@ -59,26 +59,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Daftar Akun')),
+      appBar: AppBar(title: const Text('Daftar Akun')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             if (errorMessage != null)
-              Text(errorMessage!, style: TextStyle(color: Colors.red)),
+              Text(errorMessage!, style: const TextStyle(color: Colors.red)),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(onPressed: _signUp, child: Text('Daftar')),
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                  onPressed: _signUp,
+                  child: const Text('Daftar'),
+                ),
           ],
         ),
       ),

@@ -6,7 +6,7 @@ import 'signup_screen.dart';
 class LoginScreen extends StatefulWidget {
   final SupabaseService service;
 
-  const LoginScreen({Key? key, required this.service}) : super(key: key);
+  const LoginScreen({super.key, required this.service});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -59,26 +59,26 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: const Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             if (errorMessage != null)
-              Text(errorMessage!, style: TextStyle(color: Colors.red)),
+              Text(errorMessage!, style: const TextStyle(color: Colors.red)),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
             ),
             const SizedBox(height: 20),
             isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(onPressed: _login, child: Text('Login')),
+                ? const CircularProgressIndicator()
+                : ElevatedButton(onPressed: _login, child: const Text('Login')),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-              child: Text('Belum punya akun? Daftar'),
+              child: const Text('Belum punya akun? Daftar'),
             ),
           ],
         ),
