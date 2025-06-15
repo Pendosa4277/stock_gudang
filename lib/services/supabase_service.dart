@@ -20,11 +20,10 @@ class SupabaseService {
     final user = supabase.auth.currentUser;
 
     if (user == null) {
-      throw Exception('User not logged in');
+      throw Exception('User not logged in or missing ID');
     }
 
     await supabase.from('todos').insert({
-      'id': todo.id,
       'title': todo.title,
       'detail': todo.detail,
       'created_at': todo.createdAt.toIso8601String(),
