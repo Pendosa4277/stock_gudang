@@ -22,7 +22,7 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.todo.title);
-    _detailController = TextEditingController(text: widget.todo.detail);
+    _detailController = TextEditingController(text: widget.todo.detail ?? '');
     _selectedDeadline = widget.todo.deadline;
     _validateInput();
   }
@@ -42,12 +42,17 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void _saveChanges() {
     final updatedTodo = widget.todo.copyWith(
-      title: titleController.text,
-      detail: _detailController.text,
+      title: titleController.text.trim(),
+      detail: _detailController.text.trim(),
       deadline: _selectedDeadline,
     );
 
     widget.onUpdate(updatedTodo);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Perubahan berhasil disimpan')),
+    );
+
     Navigator.pop(context);
   }
 
@@ -77,9 +82,9 @@ class _DetailScreenState extends State<DetailScreen> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(_selectedDeadline),
     );
+
     if (pickedTime != null) {
       setState(() {
-        // gabungkan jam baru dengan tanggal lama
         _selectedDeadline = DateTime(
           _selectedDeadline.year,
           _selectedDeadline.month,
@@ -94,44 +99,94 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     final formattedDeadline = DateFormat(
-      'dd MMM yyyy – HH:mm',
+      'EEEE, dd MMM yyyy – HH:mm',
     ).format(_selectedDeadline);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Detail Todo")),
+      appBar: AppBar(
+        title: const Text("Detail Todo"),
+        backgroundColor: Colors.deepPurple,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'Judul'),
-              onChanged: (_) => _validateInput(),
-            ),
-            TextField(
-              controller: _detailController,
-              decoration: const InputDecoration(labelText: "Detail"),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            Row(
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
               children: [
-                Expanded(child: Text("Deadline: $formattedDeadline")),
-                TextButton(
-                  onPressed: _pickDeadlineDate,
-                  child: const Text("Ubah Tanggal"),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Judul',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onChanged: (_) => _validateInput(),
+                  autofocus: true,
                 ),
-                TextButton(
-                  onPressed: _pickDeadlineTime,
-                  child: const Text("Ubah Waktu"),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _detailController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: "Detail",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today, color: Colors.deepPurple),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Deadline: $formattedDeadline",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.edit_calendar,
+                        color: Colors.deepPurple,
+                      ),
+                      onPressed: _pickDeadlineDate,
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.access_time,
+                        color: Colors.deepPurple,
+                      ),
+                      onPressed: _pickDeadlineTime,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: _isInputValid ? _saveChanges : null,
+                    icon: const Icon(Icons.save),
+                    label: const Text("Simpan Perubahan"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: const TextStyle(fontSize: 16),
+                    ),
+                  ),
                 ),
               ],
             ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _isInputValid ? _saveChanges : null,
-              child: const Text("Simpan Perubahan"),
-            ),
-          ],
+          ),
         ),
       ),
     );

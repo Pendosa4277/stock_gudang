@@ -4,7 +4,7 @@ import '../models/todo.dart';
 
 class TodoProvider extends ChangeNotifier {
   final List<Todo> _todos = [];
-  final Uuid _uuid = Uuid();
+  static final Uuid _uuid = Uuid();
 
   List<Todo> get todos => _todos;
 

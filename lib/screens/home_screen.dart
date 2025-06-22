@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/todo.dart';
 import '../screens/detail_screen.dart';
+import '../screens/login_screen.dart';
 import '../services/supabase_service.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   final SupabaseService service;
@@ -25,6 +27,17 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     supabaseService = SupabaseService(supabaseClient);
     _loadTodos();
+  }
+
+  Future<void> _logout() async {
+    await supabaseClient.auth.signOut();
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen(service: supabaseService)),
+    );
   }
 
   Future<void> _loadTodos() async {
@@ -52,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final todo = Todo(
       id: '',
       title: title,
+      detail: '',
       createdAt: DateTime.now(),
       deadline: deadline,
     );
@@ -114,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   isInputValid = newValid;
                 });
               }
-              print('isInputValid: $isInputValid');
             }
 
             return AlertDialog(
@@ -127,9 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: const InputDecoration(
                       hintText: "Tulis todo...",
                     ),
-                    onChanged: (value) {
-                      updateIsValid();
-                    },
+                    onChanged: (_) => updateIsValid(),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -137,13 +148,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           selectedDeadline == null
-                              ? "pilih tanggal deadline"
+                              ? "Pilih tanggal deadline"
                               : "Tanggal: ${selectedDeadline!.toLocal().toString().split(' ')[0]}",
                         ),
                       ),
                       TextButton(
                         onPressed: () async {
-                          final DateTime? picked = await showDatePicker(
+                          final picked = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
@@ -171,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          final TimeOfDay? pickedTime = await showTimePicker(
+                          final pickedTime = await showTimePicker(
                             context: context,
                             initialTime: TimeOfDay.now(),
                           );
@@ -221,60 +232,106 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Todo')),
-      body: ListView.builder(
-        itemCount: todos.length,
-        itemBuilder: (context, index) {
-          final todo = todos[index];
-          return ListTile(
-            title: Text(todo.title),
-            subtitle: Text('Deadline: ${todo.deadline.toLocal()}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => DetailScreen(
-                              todo: todo,
-                              onUpdate:
-                                  (updatedTodo) =>
-                                      _updateTodo(index, updatedTodo),
-                            ),
-                      ),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    _deleteTodo(todo.id);
-                  },
-                ),
-              ],
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => DetailScreen(
-                        todo: todo,
-                        onUpdate:
-                            (updatedTodo) => _updateTodo(index, updatedTodo),
-                      ),
-                ),
-              );
-            },
-          );
-        },
+      appBar: AppBar(
+        title: const Text('Daftar Todo'),
+        backgroundColor: Colors.deepPurple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _logout,
+          ),
+        ],
       ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : todos.isEmpty
+              ? const Center(child: Text("Belum ada todo"))
+              : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+                  final formattedDeadline = DateFormat(
+                    'dd MMM yyyy – HH:mm',
+                  ).format(todo.deadline);
+
+                  return Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      title: Text(
+                        todo.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (todo.detail != null && todo.detail!.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(todo.detail!),
+                            ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Colors.deepPurple,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                formattedDeadline,
+                                style: const TextStyle(
+                                  color: Colors.deepPurple,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => DetailScreen(
+                                        todo: todo,
+                                        onUpdate:
+                                            (updatedTodo) =>
+                                                _updateTodo(index, updatedTodo),
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _deleteTodo(todo.id),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
+        backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.add),
       ),
     );
