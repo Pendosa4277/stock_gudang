@@ -233,8 +233,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daftar Todo'),
-        backgroundColor: Colors.deepPurple,
+        title: const Text('GUDANG INDUK'),
+        backgroundColor: Colors.yellow,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -286,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const Icon(
                                 Icons.access_time,
                                 size: 16,
-                                color: Colors.deepPurple,
+                                color: Colors.red,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddDialog,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.yellow,
         child: const Icon(Icons.add),
       ),
     );
