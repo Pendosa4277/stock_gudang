@@ -275,10 +275,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (todo.detail != null && todo.detail!.isNotEmpty)
+                          if (todo.detail.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Text(todo.detail!),
+                              child: Text(todo.detail),
                             ),
                           const SizedBox(height: 6),
                           Row(

@@ -105,7 +105,7 @@ class _DetailScreenState extends State<DetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Detail Todo"),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.yellow,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -176,7 +176,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     icon: const Icon(Icons.save),
                     label: const Text("Simpan Perubahan"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: Colors.yellow,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
